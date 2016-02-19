@@ -1,0 +1,5 @@
+F:\projects\vs2010\malibu\malibu\bin\malibu.dll
+F:\projects\vs2010\malibu\malibu\bin\malibu.pdb
+F:\projects\vs2010\malibu\malibu\obj\Debug\malibu.dll
+F:\projects\vs2010\malibu\malibu\obj\Debug\malibu.pdb
+F:\projects\vs2010\malibu\malibu\obj\Debug\malibu.csprojResolveAssemblyReference.cache
