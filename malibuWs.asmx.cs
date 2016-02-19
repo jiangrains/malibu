@@ -49,6 +49,8 @@ namespace malibu
         static string jsapi_ticket = null;
         static string api_ticket = null;
 
+        static bool first_login = true;
+
         string get_accessToken_url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={0}&secret={1}";
         string get_jsapi_ticket_url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token={0}&type=jsapi";
         string get_api_ticket_url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token={0}&type=wx_card";
@@ -410,6 +412,16 @@ leave:
         {
             string url;
             string openid = Context.Request.QueryString["openid"];
+
+#if USE_IMAXGINE_WECHAT
+            if (first_login)
+            {
+                wechat_get_accessToken();
+                wechat_get_jsapi_ticket();
+                wechat_get_api_ticket();
+                first_login = false;
+            }
+#endif
 
             if (openid == null)
             {
