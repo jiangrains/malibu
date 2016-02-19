@@ -907,7 +907,7 @@ leave:
                 }
 
                 //判断是否已经玩过游戏
-                if (Convert.ToInt32(ds.Tables["player_info"].Rows[0]["score"]) != SCORE_INIT)
+                if (Convert.ToInt32(ds.Tables["player_info"].Rows[0]["score_self"]) != SCORE_INIT)
                 {
                     errCode = 4;
                     goto leave;
@@ -930,9 +930,10 @@ leave:
                 */
 
                 diceNumber = getRandomDiceNumber();
+                int score = Convert.ToInt32(ds.Tables["player_info"].Rows[0]["score"]);
 
                 ds.Tables["player_info"].Rows[0]["score_self"] = diceNumber;
-                ds.Tables["player_info"].Rows[0]["score"] = diceNumber;
+                ds.Tables["player_info"].Rows[0]["score"] = score + diceNumber;
 
                 SqlCommandBuilder scb = new SqlCommandBuilder(player_adapter);          
                 player_adapter.Update(ds.Tables["player_info"].GetChanges()); //adapter.Update(ds);
