@@ -1,6 +1,6 @@
-﻿#define USE_IMAXGINE_WECHAT
+﻿//#define USE_IMAXGINE_WECHAT
 //#define USE_PE
-//#define USE_QA
+#define USE_QA
 
 //#define IMAXGINE_DEBUG
 
@@ -193,46 +193,29 @@ leave:
             return access_token;
 #else
             string access_token = null;
-            JavaScriptSerializer jss = new JavaScriptSerializer();
-            string ExecuteResult_str = load_data_from_url(access_token_interface_url, true, "");
-            ExecuteResult result;
-            result = jss.Deserialize<ExecuteResult>(ExecuteResult_str);
-            if (result.IsSuccess == true)
-                access_token = result.ReturnObject.ToString();
-
-            return access_token;
-#endif
-        }
-
-        /*
-        [WebMethod]
-        public string get_access_token_test()
-        {
-            string access_token_interface_url = "http://mychevywechatqa.chinacloudapp.cn:8081/Wechat/GetAccessToken1";
-            string access_token = null;
             string ExecuteResult_str = null;
             int tryCnt = 0;
+
             JavaScriptSerializer jss = new JavaScriptSerializer();
+
             while (tryCnt != TRY_CNT_MAX && ExecuteResult_str == null)
             {
                 ExecuteResult_str = load_data_from_url(access_token_interface_url, true, "");
                 tryCnt++;
             }
-            
             if (ExecuteResult_str == null)
-                return "error";
+                goto leave;
+
             ExecuteResult result;
             result = jss.Deserialize<ExecuteResult>(ExecuteResult_str);
             if (result.IsSuccess == true)
                 access_token = result.ReturnObject.ToString();
-            else
-            {
-                return "error" + ExecuteResult_str;
-            }
 
+leave:
             return access_token;
+#endif
         }
-        */
+        
 
         private string get_jsapi_ticket()
         {
@@ -241,17 +224,31 @@ leave:
 #else
             string jsapi_ticket = null;
             string access_token = null;
+            string ExecuteResult_str = null;
+            int tryCnt = 0;
+ 
+            if ((access_token = get_access_token()) == null)
+                goto leave;
+
             JavaScriptSerializer jss = new JavaScriptSerializer();
-            access_token = get_access_token();
             string url = string.Format(jsapi_ticket_interface_url, access_token);
-            string ExecuteResult_str = load_data_from_url(url, false, null);
+
+            while (tryCnt != TRY_CNT_MAX && ExecuteResult_str == null)
+            {
+                ExecuteResult_str = load_data_from_url(url, false, null);
+                tryCnt ++;
+            }
+            if (ExecuteResult_str == null)
+                goto leave;
+
             ExecuteResult result;
             result = jss.Deserialize<ExecuteResult>(ExecuteResult_str);
             if (result.IsSuccess == true)
                 jsapi_ticket = result.ReturnObject.ToString();
 
+leave:
             return jsapi_ticket;
-#endif    
+#endif
         }
 
         private string get_api_ticket()
@@ -260,18 +257,32 @@ leave:
             return api_ticket;
 #else
             string api_ticket = null;
-            string access_token = null;
+            string access_token = null;   
+            string ExecuteResult_str = null;
+            int tryCnt = 0;
+         
+            if ((access_token = get_access_token()) == null)
+                goto leave;
+
             JavaScriptSerializer jss = new JavaScriptSerializer();
-            access_token = get_access_token();
             string url = string.Format(api_ticket_interface_url, access_token);
-            string ExecuteResult_str = load_data_from_url(url, false, null);
+
+            while (tryCnt != TRY_CNT_MAX && ExecuteResult_str == null)
+            {
+                ExecuteResult_str = load_data_from_url(url, false, null);
+                tryCnt ++;
+            }
+            if (ExecuteResult_str == null)
+                goto leave;
+
             ExecuteResult result;
             result = jss.Deserialize<ExecuteResult>(ExecuteResult_str);
             if (result.IsSuccess == true)
                 api_ticket = result.ReturnObject.ToString();
 
+leave:
             return api_ticket;
-#endif 
+#endif
         }
 
 #if IMAXGINE_DEBUG
@@ -307,17 +318,21 @@ leave:
         private WechatJsapiConfig get_jssdk_config(string url)
         {
             string jsapi_ticket = null;
-            WechatJsapiConfig config = new WechatJsapiConfig();
+            WechatJsapiConfig config = null;
+
+            if ((jsapi_ticket = get_jsapi_ticket()) == null)
+                goto leave;
+
+            config = new WechatJsapiConfig();
             config.nonceStr = get_random_string();
             config.timestamp = get_timestamp();
             config.appId = appId;
-
-            jsapi_ticket = get_jsapi_ticket();
 
             string signature = string.Format(jsapi_signature, jsapi_ticket, config.nonceStr, config.timestamp, url);
 
             config.signature = FormsAuthentication.HashPasswordForStoringInConfigFile(signature, "SHA1");
 
+leave:
             return config;
         }
 
@@ -333,7 +348,9 @@ leave:
             WechatCardExt card_ext_entity = new WechatCardExt();
 
             timestamp = get_timestamp();
-            api_ticket = get_api_ticket();
+
+            if ((api_ticket = get_api_ticket()) == null)
+                goto leave;
 
             string[] str = new string[] {api_ticket,timestamp,card_id};
             Array.Sort(str);
@@ -346,16 +363,18 @@ leave:
 
             card_ext = new JavaScriptSerializer().Serialize(card_ext_entity);
 
+leave:
             return card_ext;
         }
 
         private AwardInfoEntity get_award_info()
         {
-            AwardInfoEntity award = new AwardInfoEntity();
-
-            string voucher_id1 = null;
-
+            AwardInfoEntity award = null;
             SqlConnection conn = null;
+            string voucher_id1 = null;
+            string card_ext = null;
+
+            award = new AwardInfoEntity();            
             conn = DBOperation.getSqlConn();
 
             string sqlStr = "select * from malibu_voucher_info";
@@ -370,10 +389,14 @@ leave:
 
             voucher_id1 = ds.Tables["malibu_voucher_info"].Rows[0]["voucher_id"].ToString();
 
+            if ((card_ext = get_card_ext(voucher_id1)) == null)
+                goto leave;
+
             award.voucher_id1 = voucher_id1;
-            award.voucher_ext1 = get_card_ext(voucher_id1);
+            award.voucher_ext1 = card_ext;
             award.taobao_url = taobao_url;
 
+leave:
             DBOperation.destroySqlConn(conn);
             return award;
         }
@@ -602,8 +625,6 @@ leave:
             player_adapter.Fill(ds, "player_info");
             if (ds.Tables["player_info"].Rows.Count != 1)
             {
-                //errCode = 1;
-                //goto leave;
                 player.openid = openid;
 
                 DataRow newRow = ds.Tables["player_info"].NewRow();
@@ -650,7 +671,11 @@ leave:
             }
 
             string url = string.Format(malibu_loading_page_url, openid);
-            jssdk_config = get_jssdk_config(url);
+            if ((jssdk_config = get_jssdk_config(url)) == null)
+            {
+                errCode = 2;
+                goto leave;
+            }
 
         leave:
             DBOperation.destroySqlConn(conn);
@@ -724,7 +749,11 @@ leave:
                 hasHelp = true;
 
             string url = string.Format(malibu_loading_page2_url, openid, friend_openid);
-            jssdk_config = get_jssdk_config(url);
+            if ((jssdk_config = get_jssdk_config(url)) == null)
+            {
+                errCode = 3;
+                goto leave;
+            }
 
         leave:
             DBOperation.destroySqlConn(conn);
@@ -1401,7 +1430,11 @@ leave:
                 goto leave;
             }
 
-            award = get_award_info();
+            if ((award = get_award_info()) == null)
+            {
+                errCode = 4;
+                goto leave;
+            }
 
         leave:
             DBOperation.destroySqlConn(conn);

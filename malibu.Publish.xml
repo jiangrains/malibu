@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <publishData>
   <publishProfile publishUrl="F:\projects\vs2010\malibu\public" deleteExistingFiles="True" ftpAnonymousLogin="False" ftpPassiveMode="True" msdeploySite="malibu" msdeploySiteID="" msdeployRemoteSitePhysicalPath="" msdeployAllowUntrustedCertificate="False" msdeploySkipExtraFilesOnServer="True" msdeployMarkAsApp="False" profileName="配置文件1" publishMethod="FileSystem" replaceMatchingFiles="False" userName="" savePWD="False" userPWD="" SelectedForPublish="True">
-    <file relUrl="bin/malibu.dll" publishTime="02/19/2016 12:45:25" />
-    <file relUrl="bin/malibu.pdb" publishTime="02/19/2016 12:45:25" />
+    <file relUrl="bin/malibu.dll" publishTime="02/19/2016 15:18:55" />
     <file relUrl="malibuWs.asmx" publishTime="02/01/2016 20:22:50" />
+    <file relUrl="bin/malibu.pdb" publishTime="02/19/2016 15:18:55" />
     <file relUrl="Web.config" publishTime="02/03/2016 15:42:22" />
   </publishProfile>
 </publishData>

@@ -1,6 +1,6 @@
 ﻿//#define USE_PE
-//#define USE_QA
-#define USE_IMAXGINE_WECHAT
+#define USE_QA
+//#define USE_IMAXGINE_WECHAT
 
 using System;
 using System.Collections.Generic;
